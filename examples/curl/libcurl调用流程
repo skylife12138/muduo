@@ -1,0 +1,6 @@
+1.初始化curl：curl_global_init();
+2.创建curl::Curl，并使用函数curl_multi_setopt()将超时回调函数Curl::timerCallback()和回调函数Curl::socketCallback()添加到crul中；
+3.添加单个RequestPtr，并调用函数curl_multi_add_handle()将easy_url添加到multi stack中，该函数会直接调用超时会回调函数Curl::timerCallback(),最终在超时函数中调用函数
+  curl_multi_socket_action(curlm_, CURL_SOCKET_TIMEOUT, 0, &runningHandles_),该函数是初始化并建立一个连接socket;
+4.接着curl库会调用回调函数Curl::socketCallback(),将建立的socket根据不同的what状态添加到epoll中进行监听，实际操作为创建一个channal，然后设置该channal的读写回调函数，并将该channal设置为可写；
+5.当建立的socket中有可读写数据时，会直接调用channal中注册的读写回调函数来处理，当没有可读写数据时channal关闭，此连接也就关闭了；
